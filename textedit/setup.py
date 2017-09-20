@@ -1,26 +1,43 @@
-# Package meta-data.
-# From https://github.com/kennethreitz/setup.py/blob/master/setup.py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+# Note: To use the 'upload' functionality of this file, you must:
+#   $ pip install twine
+
+import io
+import os
+import sys
+from shutil import rmtree
+
+from setuptools import find_packages, setup, Command
+
+# Package meta-data.
 NAME = 'textedit'
-DESCRIPTION = 'A simple Python text editor for Victorian authors who just want to write.  '
+DESCRIPTION = 'A simple Python text editor for Victorian authors who just want to write. '
 URL = 'https://github.com/veekaybee/textedit'
 EMAIL = 'vickiboykis@gmail.com'
 AUTHOR = 'Vicki Boykis'
-
 
 # What packages are required for this module to be executed?
 REQUIRED = [
     # 'requests', 'maya', 'records',
 ]
 
-# Sets the path of execution to the top level of the package 
+# The rest you shouldn't have to touch too much :)
+# ------------------------------------------------
+# Except, perhaps the License and Trove Classifiers!
+# If you do change the License, remember to change the Trove Classifier for that!
+
 here = os.path.abspath(os.path.dirname(__file__))
 
+
+
+# Where the magic happens:
 setup(
     name=NAME,
-    version=about['__version__'],
+    #version=about['__version__'],
     description=DESCRIPTION,
-    long_description=long_description,
+    # long_description=long_description,
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
@@ -48,6 +65,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
-    ]
-    
+    ],
+
 )
+

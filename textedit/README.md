@@ -1,13 +1,13 @@
-# Text Edit 
+# Text Edit in Wonderland 
 
-![Alice-pig](/Users/vboykis/Desktop/python_packaging/textedit/textedit/img/alice_pig.jpg)
+![Alice-pig](img/alice_pig.jpg)
 
 The mini text editor for people who want to focus on learning Python packaging. This text editor lets you: 
 
-+ Count the number of words, sentences, and characters in  each file 
++ Count the number of words, sentences, and characters in a file 
 + Determine the [Colman-Liau readabilty index](https://readable.io/content/the-coleman-liau-index/)
 + Replace a phrase or string with another phrase 
-+ Change spacing between sentences from single space period to double space/period
++ Change spacing between sentences from single space period to double space/period and backwards
 
 and not much else. 
 
@@ -17,9 +17,10 @@ and not much else.
 These directions are for OSX/Linux-based systems. Windows will be slightly different. 
 
 1. You'll need at least Python 3.5 to run Text Edit.
-2. Download the directory
-3. `cd` to textedit and run `python setup.py install`
-4. run `pip -r requirements.txt`
+2. `git clone https://gitlab.com/veekaybee/textedit.git`
+3. `cd textedit`
+3. Run `python setup.py install`
+4. Run `pip -r requirements.txt`
 5. That's it! You're ready to use textedit. 
 6. If you encounter any issues, `export PYTHONPATH="${PYTHONPATH}:/my/other/path"` to your `~/.bashrc` or Windows equivalent file. 
 
@@ -29,19 +30,27 @@ These directions are for OSX/Linux-based systems. Windows will be slightly diffe
 Python 3.5
 ```
 
-### Using
+### Using the Package API
+
+To import into your Python code: 
+
+`import textedit`
 
 Create a program that imports the package. 
 
 #### WordCount
 
-Create a WC object
-
-Functions: 
-
 `WC.word_count`
 
-#### WordCount
+
+#### Parse
+
+
+#### Spacing
+
+#### Readability
+
+
 
 
 ## Deployment
@@ -54,17 +63,13 @@ Love and Alice in Wonderland.
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Vicki Boykis**  - [On GitHub](https://github.com/veekaybee)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This is free and unencumbered software released into the public domain.
 
-## Acknowledgments
+Anyone is free to copy, modify, publish, use, compile, sell, or distribute this software, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means.
 
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
 
