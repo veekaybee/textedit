@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+"""Replaces an instance of one word with another in a copy of 
+the original file called new_filename. 
+
+Sysargs:  filename, word1, word2
+"""
+
+
 import sys
 import os
 
@@ -5,19 +14,32 @@ import os
 from review.wordcount import WC
 
 
-def replace_words(words):
-	with open(words, 'r') as input:
-		with open('../texts/new_alice.txt', 'w')as output:
-			for line in input:
-				line = line.rstrip()
-				newline = line.replace("Alice", "Dora the Explorer")
-				output.write(newline)
+class Replace(object):
+	"""Replaces one phrase with another"""
+	
+	def __init__(self, filename, initial_word, replacement_word):
+		self.filename = filename
+		self.initial_word = initial_word
+		self.replacement_word = replacement_word
+
+	def replace_words(self, filename, initial_word, replacement_word):
+		with open(filename, 'r') as input:
+			with open('../texts/new_%s.txt' % self.filename , 'w') as output:
+				for line in input:
+					line = line.rstrip()
+					newline = line.replace(initial_word, replacement_word)
+					output.write(newline)
 
 if __name__ == '__main__':
-	replace_words('../texts/alice.txt')
-	alice = WC('../texts/alice.txt')
+	filename = sys.argv[1]
+	old_word = sys.argv[2]
+	new_word = sys.argv[3]
+	Replace.replace_words(filename, old_word, new_word)
+
+	alice = WC(sys.argv[1])
 	new_alice = WC('../texts/new_alice.txt')
+
 	print("Old Wordcount",alice.word_count())
 	print("WC __name__:", WC.__name__)
 	print("New Wordcount",new_alice.word_count())
-	print("parsefile __name__:", __name__)
+	print("replacefile __name__:", __name__)
