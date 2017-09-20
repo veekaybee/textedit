@@ -2,9 +2,8 @@ import unittest
 import sys
 import os
 
-# import wordcount
-sys.path.append(os.path.abspath("/Users/vboykis/Desktop/python_packaging/textedit/textedit/review"))
-from wordcount import WC
+# import wordcount from its relative path
+from review.wordcount import WC
 
 WC_test = WC('../texts/alice.txt')
 

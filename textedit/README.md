@@ -1,6 +1,7 @@
-# Text Edit in Wonderland 
+# ✏️ Text Edit in Wonderland ✏️ 
 
-![Alice-pig](img/alice_pig.jpg)
+
+<img src="img/alice_pig.jpg" alt="Alice with Pig" style="width: 200px;"/>
 
 The mini text editor for people who want to focus on learning Python packaging. This text editor lets you: 
 
@@ -40,15 +41,25 @@ Create a program that imports the package.
 
 #### WordCount
 
-`WC.word_count`
+`python wordcount.py ../texts/alice.txt`
+
+Or you can try a file in your current working directory
 
 
-#### Parse
+#### Replace
 
+`python replace.py ../texts/alice.txt "Vicki" "Dora"`
 
 #### Spacing
 
+`python replace.py ../texts/alice.txt "Vicki" "Dora"`
+
 #### Readability
+
+`python replace.py ../texts/alice.txt "Vicki" "Dora"`
+
+
+### Putting an entire file through the paces
 
 
 

@@ -1,21 +1,20 @@
-'''
-Colman-Liau Index
+#!/usr/bin/env python
 
-The Colman-Liau Index 
-https://readable.io/content/the-coleman-liau-index/
+"""Computes the Colman-Liau index for any given file. 
+Returns the grade level reading ability of the file. 
+
+More on The Colman-Liau Index 
+https://readable.io/content/the-coleman-liau-index:
+
+Formula: 
 
 L = average number of letters per 100 words and;
-
 S = average number of sentences per 100 words.
-
-The formula is as follows:
-
 0.0588L – 0.296S – 15.8
 
-
-'''
-
-import wordcount
+"""
+from review.wordcount import WC
+import sys
 
 WORD_INCREMENT = 100
 
@@ -36,7 +35,7 @@ def colman_liau(filename):
 
 
 if __name__ == '__main__':
-	print(colman_liau('../texts/alice.txt'))
+	print(colman_liau(sys.argv[1]))
 
 
 

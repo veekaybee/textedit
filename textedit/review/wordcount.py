@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+
+"""Takes a file as sys.arg[1] as input and returns a wordcount, 
+character count, and sentence count.
+"""
+
 import re
 import sys
 
