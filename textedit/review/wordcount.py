@@ -1,4 +1,5 @@
 import re
+import sys
 
 
 class WC(object):
@@ -7,7 +8,6 @@ class WC(object):
 	def __init__(self, filename):
 
 		self.filename = filename
-
 
 
 	def open_file(self,filename):
@@ -53,9 +53,10 @@ class WC(object):
 
 
 if __name__ == '__main__':
-	alice = WC('../texts/alice.txt')
-	print(alice.word_count('../texts/alice.txt'))
-	print(alice.sentence_count('../texts/alice.txt'))
-	print(alice.character_count('../texts/alice.txt'))
+	filename = sys.argv[1]
+	alice = WC(filename)
+	print(alice.word_count())
+	print(alice.sentence_count())
+	print(alice.character_count())
 
 
