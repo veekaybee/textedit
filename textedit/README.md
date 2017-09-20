@@ -24,6 +24,7 @@ These directions are for OSX/Linux-based systems. Windows will be slightly diffe
 4. Run `pip -r requirements.txt`
 5. That's it! You're ready to use textedit. 
 6. If you encounter any issues, `export PYTHONPATH="${PYTHONPATH}:/my/other/path"` to your `~/.bashrc` or Windows equivalent file. 
+7. Running tests: python -m unittest discover
 
 ### Prerequisites
 
@@ -60,7 +61,6 @@ Or you can try a file in your current working directory
 
 
 ### Putting an entire file through the paces
-
 
 
 
