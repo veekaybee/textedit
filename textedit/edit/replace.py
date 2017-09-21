@@ -13,7 +13,6 @@ import os
 # importing relative directories
 from review.wordcount import WC
 
-
 class Replace(object):
 	"""Replaces one phrase with another"""
 	
@@ -31,14 +30,17 @@ class Replace(object):
 					output.write(newline)
 
 if __name__ == '__main__':
+	# Read command line inputs
 	filename = sys.argv[1]
 	old_word = sys.argv[2]
 	new_word = sys.argv[3]
-	Replace.replace_words(filename, old_word, new_word)
+
+	Replace(filename, old_word, new_word)
 
 	alice = WC(sys.argv[1])
 	new_alice = WC('../texts/new_alice.txt')
 
+	# Output stats
 	print("Old Wordcount",alice.word_count())
 	print("WC __name__:", WC.__name__)
 	print("New Wordcount",new_alice.word_count())

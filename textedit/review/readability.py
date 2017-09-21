@@ -12,25 +12,29 @@ L = average number of letters per 100 words and;
 S = average number of sentences per 100 words.
 0.0588L – 0.296S – 15.8
 
+Sysargs:  filename
+
 """
 from review.wordcount import WC
 import sys
 
 WORD_INCREMENT = 100
 
+
 def get_letters(filename):
 
-	L = wordcount.character_count(filename) /  wordcount.word_count(filename) * 100 
+	L = WC.character_count(filename)[1] /  WC.word_count(filename)[1] * 100 
 	return L
 
 def get_sentences(filename):
 
-	S = wordcount.sentence_count(filename)/ wordcount.word_count(filename) * 100 
+	S = WC.sentence_count(filename)[1]/ WC.word_count(filename)[1] * 100 
 	return S
 
 
 def colman_liau(filename):
-	index = 0.0588 * get_letters(filename) - 0.296 * get_sentences(filename) - 15.8
+	file_operator = WC(filename)
+	index = 0.0588 * get_letters(file_operator) - 0.296 * get_sentences(file_operator) - 15.8
 	return("Reading Grade Level of Text:", round(index))
 
 
