@@ -24,7 +24,7 @@ These directions are for OSX/Linux-based systems. Windows will be slightly diffe
 4. Run `pip -r requirements.txt`
 5. That's it! You're ready to use textedit. 
 6. If you encounter any issues, `export PYTHONPATH="${PYTHONPATH}:/my/other/path"` to your `~/.bashrc` or Windows equivalent file. 
-7. Running tests: python -m unittest discover
+7. Running tests: `python -m unittest discover` to test whether wordcount works. 
 
 ### Prerequisites
 
@@ -38,35 +38,70 @@ To import into your Python code:
 
 `import textedit`
 
-Create a program that imports the package. 
+You can run the code inter
+```
+#Replace 
 
-#### WordCount
+python replace.py ../texts/alice.txt "Vicki" "Dora the Explorer"
+Old Wordcount ('Words:', 274)
+WC __name__: WC
+New Wordcount ('Words:', 281)
+parsefile __name__: __main__
 
-`python wordcount.py ../texts/alice.txt`
+#WordCount
 
-Or you can try a file in your current working directory
+mbp-vboykis:review vboykis$ python wordcount.py "../texts/alice.txt"
+('Words:', 274)
+('Sentences:', 7)
+('Letters:', 1120)
+
+# Readability
+
+mbp-vboykis:review vboykis$ python readability.py "../texts/alice.txt"
+('Reading Grade Level of Text:', 7)
+```
+
+Or, you can import it and use on a text file: 
+
+```
+"""Tests textedit functionality on the pool_of_tears.txt file"""
 
 
-#### Replace
-
-`python replace.py ../texts/alice.txt "Vicki" "Dora"`
-
-#### Spacing
-
-`python replace.py ../texts/alice.txt "Vicki" "Dora"`
-
-#### Readability
-
-`python replace.py ../texts/alice.txt "Vicki" "Dora"`
+from textedit.review import readability 
+from textedit.review import wordcount 
+from textedit.edit import spacing
+from textedit.edit import replace
 
 
-### Putting an entire file through the paces
+test_file = '/Users/vboykis/Desktop/python_packaging/textedit/textedit/texts/pool_of_tears.txt'
 
+# Count words
+alice = wordcount.WC(test_file)
+
+print(wordcount.WC.word_count(alice))
+print(wordcount.WC.character_count(alice))
+print(wordcount.WC.sentence_count(alice))
+
+# Readability Index
+
+print(readability.colman_liau(test_file))
+
+# Change Spacing
+
+sp = spacing.Spacing(test_file)
+spacing.Spacing.spacing_check(sp)
+print('Spaces replaced')
+
+# Replace Words
+
+replace.Replace(test_file, "Alice", "Dora the Explorer")
+print('Words replaces')
+```
 
 
 ## Deployment
 
-None! This is not a production-ready package. 
+None! This is not a production-ready package. Install on your local machine and test it out and break things. 
 
 ## Built With
 Love and Alice in Wonderland. 
@@ -81,6 +116,6 @@ Love and Alice in Wonderland.
 
 This is free and unencumbered software released into the public domain.
 
-Anyone is free to copy, modify, publish, use, compile, sell, or distribute this software, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means.
+Anyone is free to copy, modify, publish, use, compile, sell, or distribute this software, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means. No guarantees, batteries sold separately. 
 
 

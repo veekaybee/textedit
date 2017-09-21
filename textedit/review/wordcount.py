@@ -2,6 +2,8 @@
 
 """Takes a file as sys.arg[1] as input and returns a wordcount, 
 character count, and sentence count.
+
+Sysargs:  filename
 """
 
 import re
@@ -40,10 +42,10 @@ class WC(object):
 
 	def character_count(self):
 
-		"""Returns a file's character count"""
+		"""Returns a file's character count, excluding punctuation"""
 		letter_counter = 0
 
-		pattern = r'[\W]'
+		pattern = r'[\W]' # excluding all punctuation
 
 		cc_file = self.open_file(self.filename)
 
@@ -56,13 +58,12 @@ class WC(object):
 		
 		return("Letters:", letter_counter)
 
-
-
 if __name__ == '__main__':
 	filename = sys.argv[1]
 	alice = WC(filename)
-	print(alice.word_count())
-	print(alice.sentence_count())
-	print(alice.character_count())
+
+	print(WC.word_count(alice))
+	print(WC.sentence_count(alice))
+	print(WC.character_count(alice))
 
 
