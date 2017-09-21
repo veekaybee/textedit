@@ -1097,11 +1097,47 @@ mbp-vboykis:review vboykis$ python readability.py "../texts/alice.txt"
 ('Reading Grade Level of Text:', 7)
 ```
 
-Or we can now call the package from a completely new program, since we have it installed. 
+Or we can now call the package from a completely new program, since we have it installed. Note the import structure. Each folder and subfolder is `folder.subfolder`, and each module name is after the import. Classes are referenced later down. 
+
+```
+"""Tests textedit functionality on the pool_of_tears.txt file"""
+
+
+from textedit.review import readability 
+from textedit.review import wordcount 
+from textedit.edit import spacing
+from textedit.edit import replace
+
+
+test_file = '/Users/vboykis/Desktop/python_packaging/textedit/textedit/texts/pool_of_tears.txt'
+
+# Count words
+alice = wordcount.WC(test_file)
+
+print(wordcount.WC.word_count(alice))
+print(wordcount.WC.character_count(alice))
+print(wordcount.WC.sentence_count(alice))
+
+# Readability Index
+
+print(readability.colman_liau(test_file))
+
+# Change Spacing
+
+sp = spacing.Spacing(test_file)
+spacing.Spacing.spacing_check(sp)
+print('Spaces replaced')
+
+# Replace Words
+
+replace.Replace(test_file, "Alice", "Dora the Explorer")
+print('Words replaces')
+```
 
 The next step would be to use [`argparse`](https://docs.python.org/3/library/argparse.html) to pass arguments a bit more cleanly. 
 
 And it is! We've imported a package that we can now use to write other software. 
+
 
 
 ## Super-advanced next steps
