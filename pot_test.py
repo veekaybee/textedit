@@ -29,7 +29,7 @@ print('Spaces replaced')
 # Replace Words
 
 replace.Replace(test_file, "Alice", "Dora the Explorer")
-print('Words replaces')
+print('Words replaced')
 
 
 

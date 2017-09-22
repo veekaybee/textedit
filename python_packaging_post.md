@@ -43,34 +43,36 @@ layout: post
 
 ## Preamble
 
-Recently, I built a machine learning natural language app in Python. It has a web interface where you can type in a query, like google. The program process the JSON text input as a natural language query and searches the text database for  phrases that are similar. It then returns matches. 
+Recently, I built a machine learning natural language app in Python. It has a Google-like web interface where you can type in a query. The program process JSON text input from a number of data sources. It then searches the text database for phrases that are similar based on a trained Tensorflow model and returns matches. 
 
 ![flow](img/flaskflow.png)
 
 There are several moving parts: 
+
 1) A data import/cleaning module
+
 2) The Tensorflow machine learning model
-3) the Flask webapp that accepts text input/surfaces the matches
 
-When I started to figure out how to glue these three pieces together into a single package, like one you would do a `pip install` on and just have it work locally on any machine, it wasn't as straightforward as I hoped. It turned out that there was a lot going on in the Python packaging world. 
+3) The Flask webapp that accepts text input/surfaces the matches
 
-Should I be using virtualenvs? Pipenvs? `Setuptools`? Should I have a `setup.cfg?` Where do my tests go? Which testing suite do I use?  Does each folder need an `__init.py__`? How do I reference modules along the same `PYTHONPATH`? These were just some of the questions I had when I was getting started. 
+When I started to figure out how to glue these three pieces together into a single package you would do a `pip install` on and have it work locally on any machine, it wasn't as straightforward as I hoped. It turned out that there was a lot going on in the Python packaging world. 
 
-While I was researching, it became apparent that Python's flexbility, which I really appreciate when I'm writing code, makes it a huge pain to operationalize. 
+Should I be using virtualenvs? Pipenvs? `Setuptools`? Should I have a `setup.cfg?` Where do my tests go? Which testing suite do I use?  Does each folder need an `__init.py__`? What does that file even do?  How do I reference modules along the same `PYTHONPATH`? These were just some of the questions I had when I was getting started. 
 
-As I worked, I thought I'd write down everything I learned through a simple example. But, as I started writing, I realized I *extremely Inception voice* needed to go deeper in understanding what's going on in the Python language.   
-So, the idea of this post is to build up to packaging from the very basics of Python internals.  
+It became apparent that Python's flexbility, which I really appreciate when I'm writing code, makes it a huge pain to operationalize. 
 
-Come with me on a voyage of magic, adventure, and really annoying relative path references to find out how and why Python packaging works the way it does. 
+As I worked, I thought I'd write down everything I learned through a simple example. But, as I started writing, I realized I *extremely Inception voice* needed to go deeper to understand what's going on in the Python language.   
+
+So, the idea of this post is to build up to packaging from the very basics of Python internals.  Come with me on a voyage of magic, adventure, and really annoying relative path references to find out how and why Python packaging works the way it does. 
 
 
-To go through this, you should be reasonably comfortable with Python (aka if you know what a [list comprehension](http://effbot.org/zone/python-list.htm) is and how it works you should probably be good) and have some understanding of OOP basics.
+To go through this post, you should be reasonably comfortable with Python (aka if you know what a [list comprehension](http://effbot.org/zone/python-list.htm) is and how it works you should probably be good) and have some understanding of OOP basics.
 
 ## Python hides the hurt
 
 I'm going to start this Python post with a little Java. Sorry in advance. 
 
-I'm currently working through a certificate in computer science, and most of my classes so far have been in Java.   I've previously done mostly dynamically-typed Python, and R, which is way out there, and Scala, but for Spark, which doesn't count, so I was a little intimidated by the shackles of Java syntax.   
+I'm currently working through a certificate in computer science, and most of my classes so far have been in Java.   I've previously done mostly dynamically-typed Python, and R, which is way out there, and Scala, but for Spark, which is a separate beast altogether, so I was a little intimidated by the shackles of Java syntax.   
 
 For instance, if I want to read a text file, change some text in it, and output to a new file, that process is pretty painless in Python:  
 
@@ -115,7 +117,7 @@ public static void main(String[] args) {
              writer.close();
 
          }
-         catch (IOException ioe)
+         catch (IOException io)
              {
              ioe.printStackTrace();
          }
@@ -132,7 +134,7 @@ In Java, you could have three classes, put them in a directory called `project/j
 
 But, since Python abstracts types, objects, and paths away from the user, it becomes a bit more complicated internally. Python has to make up for that ease of use further down in the stack, and therefore packaging, file directory references, execution speed, and object operations become more of a challenge.  
 
-To understand what Python abstracts away and why this leads to different architecture choices, let's start at the Beginning. 
+To understand what Python abstracts away and why this leads to different architecture choices, let's start at The Beginning. 
 
 
 ## Building a word processor with Python
@@ -182,9 +184,7 @@ public class Alice {
 }
 ```
 
-In Python, we have to dig a little to find that information. 
-
-First, we can find out the memory address of the object:
+In Python, we have to dig a little to find that information. First, we can find out the memory address of the object:
 
 ```
 >>> id(x)
@@ -625,7 +625,7 @@ So we want something, at the very basic level, like this:
 ├── replace.py
 ├── wordcount.py
 ├── spacing.py
-└── spellcheck.py
+└── readability.py
 
 ```
 
@@ -645,16 +645,16 @@ Which brings me to a (probably obvious) tip: Try to base your software on existi
 		├── spacing.py
 	├── review
 		├── wordcount.py
-		└── spellcheck.py
+		└── readability.py
 	├── texts
 		├── alice.txt
 		└── pool_of_tears.txt
 
 ```
 
-At its very basic level, this is what your code structure looks like. 
+At its very basic level, this is what our code structure looks like. 
 
-But, there are signals we need to give to Python to read this correctly.  CPython also needs to know how these things relate to each other. And the code needs to be built in a way such that other people can seamlessly download it and use it without a lot of explanation from you. 
+But, there are signals we need to give to Python to read this correctly.  CPython also needs to know how these things relate to each other in order to compile a package for us. And the code needs to be built in a way such that other people can seamlessly download it and use it without a lot of explanation from you. 
 
 Which is why, if you look at some popular Python project folder structures,like [Pandas](https://github.com/pandas-dev/pandas), [Requests](https://github.com/requests/requests), or [Flask](https://github.com/pallets/flask), you'll see they tend to be a bit more complicated.  
 
@@ -683,7 +683,9 @@ First, Python needs to have all of the files of the [project in its same directo
 
 ### Unit Tests 
 
-Then, you'll  want to add tests. Unit tests help you make sure that your code runs as expected, even as you change it. You usually want to write a test for each function or package. There is a whole art/science to unit testing, so I'm going to skip it and just write an example test, called test_wordcount.py.
+Then, you'll  want to add tests. Unit tests help you make sure that your code runs as expected, even as you change it. You usually want to write a test for each function or package. 
+
+There is a whole art/science to unit testing, but for the sake of this example, I'm going to skip it and just write an example test, called `test_wordcount.py`.
 
 ```
 import unittest
@@ -1154,7 +1156,7 @@ But, now that we've taken our first step into a much larger and more insane worl
 
 Here are some great places to start exploring once you've gotten the hang of the above: 
 
-### Venv
+### Testing in environments
 
 I mentioned before that there are several ways to create specific environments to build your applications so you're isolated from whatever else is going on in your Python ecosystem. 
 
