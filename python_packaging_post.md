@@ -66,7 +66,7 @@ As I worked, I thought I'd write down everything I learned through a simple exam
 So, the idea of this post is to build up to packaging from the very basics of Python internals.  Come with me on a voyage of magic, adventure, and really annoying relative path references to find out how and why Python packaging works the way it does. 
 
 
-To go through this post, you should be reasonably comfortable with Python (aka if you know what a [list comprehension](http://effbot.org/zone/python-list.htm) is and how it works you should probably be good) and have some understanding of OOP basics.
+To go through this post, you should be reasonably comfortable with Python (aka if you know what a [list comprehension](http://effbot.org/zone/python-list.htm) is and how it works you should probably be good) and have some understanding of object-oriented programming basics.
 
 ## Python hides the hurt
 
@@ -82,7 +82,7 @@ For instance, if I want to read a text file, change some text in it, and output 
 # Replaces all instances in a file from "Alice" to "Dora the Explorer"
 
 with open('alice.txt', 'r') as input:
-	with open('new_alice.txt', 'w')as output:
+	with open('new_alice.txt', 'w') as output:
 		for line in input:
 			line = line.rstrip()
 			newline = line.replace("Alice", "Dora the Explorer")
@@ -128,7 +128,7 @@ public static void main(String[] args) {
 } 
 ```
 
-For a program of a couple lines, you might not want to use Java. But the reason all of Java's scaffolding and type safety exist is that it makes large programs easier to package. 
+For a program of a couple lines, you might not want to use Java. But a benefit all of Java's scaffolding and type safety exist is that it makes large programs easier to package. 
 
 In Java, you could have three classes, put them in a directory called `project/java/src/program` and call `package` on them, and they'll automatically reference each other. You can compile a package in Maven or similar through the command line. And you're done. 
 
@@ -191,7 +191,9 @@ In Python, we have to dig a little to find that information. First, we can find 
 4409066472
 ```
 
-Then, we can look at the type of a single Python object by calling `dir()` on it. You can see that it's an instance of class `string`. And, further, you can see that string is a class, too, type. 
+Then, we can look at the type of a single Python object by calling `type()` on it. 
+
+You can see that it's an instance of class `string`. And, further, you can see that string is a class, too, type. 
 
 ```
 >>> x = "Alice"
@@ -211,7 +213,7 @@ It's classes and objects all the way down. We can also find out more about the s
 
 (If you're more curious about how strings specifically are created, digging into [the Python source code is fun](https://github.com/python/cpython/blob/2.7/Objects/stringobject.c), which is where the `__doc__` string comes from comes from. 
 
-And if we do `dir`, we can see all of the object attributes (methods and attributes with double underscores) and all of the methods that can act on that class. Attributes are created specifically by higher-level Python classes. Methods are specific to that object.
+And if we call `dir()`, we can see all of the object attributes (methods and attributes with double underscores) and all of the methods that can act on that class. Attributes are created specifically by higher-level Python classes. Methods are specific to that object.
 
 For example, most Python objects have the `__add__`, `__dir__`, and `__setattr__` attributes. Only strings have `join`, `strip`, and `replace` 
  
@@ -306,13 +308,13 @@ When we run `python wordcount.py`, a [couple things happen](https://tech.blog.ak
 
 1) Python parses command line arguments (aka everything after `python` on the CLI
 2) Python checks for any dependencies (aka `import` statements) and pulls them in. 
-3) Python looks in your current working directory (`python_packaging`) for anything related to the file, and uses the path setup from when Python was installed on your system. 
+3) Python looks in our current working directory (`python_packaging`) for anything related to the file, and uses the path setup from when Python was installed on your system. 
 
-Let's check what our PYTHONPATH is:
+Let's check what our `PYTHONPATH` is:
 
 ```
 >>> import os
->>> os.getcwd() #where wer're currently running code
+>>> os.getcwd() #where we're currently running code
 '/Users/vboykis/Desktop/python_packaging'
 
 >>> print('\n'.join(sys.path)) # all the paths Python checks for packages
@@ -324,9 +326,10 @@ Let's check what our PYTHONPATH is:
 /usr/local/lib/python3.5/site-packages
 ```
 
-4 Python assembles a Python virtual machine, [CPython](https://en.wikipedia.org/wiki/CPython), to execute and interpret the code. 
+4) Python assembles a Python virtual machine, [CPython](https://en.wikipedia.org/wiki/CPython), to execute and interpret the code. 
 5) If there are no external dependencies, as is the case in our word count program, a special attributed, ``__name__`` is initialized to ``"__main__"`` in the __main__ [namespace](https://docs.python.org/3/library/__main__.html). 
 
+Program: 
 
 ```
 print("__name__:", __name__)
@@ -334,9 +337,10 @@ print("__name__:", __name__)
 with open('texts/alice.txt', 'r') as file:
 	file_contents = file.read()
 	print('Word count:', len(file_contents.split()))
-
----
-
+```
+Output:
+ 
+```
 mbp-vboykis:python_packaging vboykis$ python wordcount.py 
 __name__: __main__
 Word count: 274
@@ -379,6 +383,7 @@ These kinds of refactoring tasks will become important as we start to understand
 
 Ok, so we've run our file. Now what? Let's refactor it so we can call it on any file, not just `alice.txt`.  The best way to do this is to turn the loop into a function, which we can call from anywhere, instead of just in that specific file. 
 
+Program: 
 
 ```
 def word_count(filename):
@@ -395,13 +400,13 @@ def sentence_count(filename):
 if __name__ == '__main__':
 	word_count('pool_of_tears.txt')
 	sentence_count('pool_of_tears.txt')
-	
----
+```
+Output:	
 
+```
 vboykis$ python wordcount.py
 Total words:    2098
 total sentences:     117
-
 
 ```
 
@@ -550,6 +555,8 @@ So, since the word count module is smaller, I'd like to call it from the `replac
 
 We also want to see what the name of the module in relationship to the module calling it is. Notice that wordcount's `__name __`is `wordcount`, while `replace's` is `main`, since that's now the main module we're referencing.
 
+Program: 
+
 ```
 from wordcount import WC
 
@@ -569,11 +576,15 @@ if __name__ == '__main__':
 	print("WC __name__:", WC.__name__)
 	print("New Wordcount",new_alice.word_count())
 	print("replace __name__:", __name__)
-	---
-	Old Wordcount ('Words:', 274)
-	WC __name__: WC
-	New Wordcount ('Words:', 281)
-	replace __name__: __main__
+```
+
+Output: 
+
+```
+Old Wordcount ('Words:', 274)
+WC __name__: WC
+New Wordcount ('Words:', 281)
+replace __name__: __main__
 ```
 
  
@@ -687,6 +698,9 @@ Then, you'll  want to add tests. Unit tests help you make sure that your code ru
 
 There is a whole art/science to unit testing, but for the sake of this example, I'm going to skip it and just write an example test, called `test_wordcount.py`.
 
+
+Program: 
+
 ```
 import unittest
 import sys
@@ -719,7 +733,10 @@ class Test(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
     
-    ---
+```
+Output:
+
+```
     mbp-vboykis:tests vboykis$ python test_wordcount.py 
 ...
 ----------------------------------------------------------------------
@@ -866,13 +883,13 @@ This is also where continuous integration can come in.
 
 ### __init.py__
 
-And, finally and most importantly, the ``__init__.py``, which you'll want to add to every directory where you have runable Python modules. 
+And, finally and most importantly, the `__init__.py`, which you'll want to add to every directory where you have runable Python modules. 
 
-If you remember from the Python innards overview ``__init__`` is a special file that will make Python realize that you have a package working together instead of a [single file.](https://docs.python.org/3/tutorial/modules.html#packages)
+If you remember from the Python innards overview `__init__` is a special file that will make Python realize that you have a package working together instead of a [single file.](https://docs.python.org/3/tutorial/modules.html#packages)
 
 You can leave it null. Or you can [add things to it](http://mikegrouchy.com/blog/2012/05/be-pythonic-__init__py.html) that will initialize when the module is run.  Let's leave it null for now. 
 
-When Python imports the module for the first time, it checks the module registry for a list of modules that it can use. Init allows your module to be [put in that registry.](http://effbot.org/zone/import-confusion.htm#what-does-python-do). 
+When Python imports the module for the first time, it checks the module registry for a list of modules that it can use. `Init` allows your module to be [put in that registry.](http://effbot.org/zone/import-confusion.htm#what-does-python-do). 
 
 ### __main.py__ driver
 
@@ -916,7 +933,7 @@ It has metadata about the project, `import distutils`, which does the actual pro
 
 Here's more [really good background](https://github.com/kennethreitz/setup.py) on what goes into the file.  
 
-Here's what ours will look like. The most important part is setting the here variable to the current filepath. Remember how we had to do crazy things to get our modules to reference each other in the context of the package? 
+Here's what ours will look like. The most important part is setting the `here` variable to the current filepath. Remember how we had to do crazy things to get our modules to reference each other in the context of the package? 
 `sys.path.append(os.path.abspath("/Users/vboykis/Desktop/python_packaging/textedit/textedit/review"))`
 
 This lets us avoid all of that and forces a root directory.
@@ -999,9 +1016,9 @@ For us, it would be:
 
 The rest is metadata about who you are and what the package looks like. It's really top-loaded for use in PyPI, so I removed those components and kepts the ones necessary for use locally. 
 
-One of the things included in here is the `install_requires` which lists the requirements that will be installed for the file to continue. But wait, you say. Don't we already have a requirements.txt file? Yes, we do. We'll be using that one, instead. 
+One of the things included in here is the `install_requires` which lists the requirements that will be installed for the file to continue. But wait, you say. Don't we already have a `requirements.txt` file? Yes, we do. We'll be using that one, instead. 
 
-The difference between the two is that install_requires is configured more if you're packaging for production-ready systems and putting your package in PyPi, the Python package repository. If you are targeting specific packages in [development or testing, use requirements.txt.](https://www.reddit.com/r/Python/comments/3uzl2a/setuppy_requirementstxt_or_a_combination/) 
+The difference between the two is that `install_requires` is configured more if you're packaging for production-ready systems and putting your package in PyPi, the Python package repository. If you are targeting specific packages in [development or testing, use requirements.txt.](https://www.reddit.com/r/Python/comments/3uzl2a/setuppy_requirementstxt_or_a_combination/) 
 
 Since we're not exactly focusing on targeting PyPi here to keep things simple, we'll use requirements. 
 
@@ -1046,9 +1063,9 @@ You can see that in action here, [for example](https://github.com/pallets/flask/
 
 Ok, we're done writing all of our code, our tests, making sure objects are accessible, and we have our structure all layed out. What do we do now? Let's package it!
 
-Let's go to the module level of our package, aka where our setup.py file that will actually handle the install is located
+Let's go to the module level of our package - where our `setup.py` file that will actually handle the install is located
 
-`cd /Users/vboykis/Desktop/python_packaging/textedit/textedit`
+`mbp-vboykis:textedit vboykis$ cd /Users/vboykis/Desktop/python_packaging/textedit/textedit`
 
 and run 
 
