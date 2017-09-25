@@ -1,4 +1,4 @@
-"""Tests textedit functionality on the pool_of_tears.txt file"""
+"""Tests textedit functionality of the textedit module on the pool_of_tears.txt file"""
 
 
 from textedit.review import readability  #import everything in the file

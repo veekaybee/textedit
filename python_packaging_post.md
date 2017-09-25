@@ -347,10 +347,9 @@ Word count: 274
 
 ```
 
-How do we get that file elsewhere? For example, how do we import functions from wordcount if we're in the REPL? 
-The REPL is, essentially, a special case of a file being executed directly in the working directory where you call the REPL from.
+How do we get that file elsewhere? For example, how do we import functions from wordcount if we're in the REPL?  The REPL is, essentially, a special case of a file being executed directly in our current working directory.
 
-However, if you run `wordcount.py` form the REPL, since you're importing the `wordcount` module from elsewhere, the name immediately becomes that module. 
+However, if we run `wordcount.py` form the REPL, since we're importing the `wordcount` module from elsewhere, the name immediately becomes that module. 
 
 ```
 >>> import wordcount
@@ -371,26 +370,21 @@ We've just created a Python runtime environment, told Python which directories i
 
 Ok, so we've run our program. But, if we try to run it on any other file, not just `alice.txt`, we won't be able to. Let's make it a bit more robust. First, we'll abstract out some of the hard coding referencing `alice.txt`. 
 
-Second, we'll turn the code from a simple loop, into a function that acts like an API so
+Second, we'll turn the code from a simple loop, into a function that acts like an API so that we can access a single pointer to our loop from other places in the file, and from other fiels. 
 
-finally, 
+Finally, we'll add `if __name__ == '__main__'` to the program, put all the functions we want to execute under the if block,  and run the file that way. 
 
-  The best way to do this is to make it a easier to read and work with other code by adding entry endpoints. 
+This is a really common pattern for running multiple functions and keeping track of them.  As we noted in the last section, 
 
-We'll make it a function and add `if __name__ == '__main__'` to the program. This is a really common pattern for running multiple functions and keeping track of them.  If the program is the main program you're running, Python will run everything in order under that statement. 
+> If there are no external dependencies (aka packages), as is the case in our word count program, a special attributed, ``__name__`` is initialized to ``"__main__"`` in the __main__ [namespace](https://docs.python.org/3/library/__main__.html)
+> 
+If the program is the main program you're running, Python will run everything in order under that statement.  
 
 Note that if you don't have `if __name__ == '__main__'`, the code won't run anything since the function is initialized but not executed. 
 
 This is a really important pattern to understand, because it looks into how Python references the current module you're working with in relation to other modulers. 
 
-Let's also:  
-
-1) Remove some of the hard coding referencing 
-2) Turn the code into a function
-3) Adding a function that counts sentences, too. 
-
-These kinds of refactoring tasks will become important as we start to understand how many files, or modules, reference each other in a package. 
-
+Let's also: adding a function that counts sentences, as well.  
 
 Program: 
 
@@ -419,6 +413,8 @@ total sentences:     117
 
 ```
 
+These kinds of refactoring tasks will become important as we start to understand how many files, or modules, reference each other in a package. 
+
 We're also going to slightly modify wordcount to return a value instead of print so we don't double-print: 
 
 ```
@@ -439,7 +435,9 @@ if __name__ == '__main__':
 	print(sentence_count('pool_of_tears.txt'))
 ```
 
-Let's do one more thing, and now make this a class so that it's really, really easy to reference from other modules. A class is part of [object-oriented programming](https://jeffknupp.com/blog/2014/06/18/improve-your-python-python-classes-and-object-oriented-programming/), and makes code more modular and easy to call. A class, in a way, is like an API. 
+Let's do one more thing, and now make this function a class so that it's really, really easy to reference from other modules. 
+
+A class is part of [object-oriented programming](https://jeffknupp.com/blog/2014/06/18/improve-your-python-python-classes-and-object-oriented-programming/), and makes code more modular and easy to call. A class, in a way, is like an API. 
 
 And, let's add a character count (we'll need that for some later work we're doing): 
 
