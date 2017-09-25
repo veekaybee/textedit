@@ -1,9 +1,9 @@
 --
-title: Alice in Python packageland
+title: Alice in Python projectland
 layout: post
 ---
 
-# Alice in Python PackageLand
+#  Alice in Python projectland
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -11,30 +11,33 @@ layout: post
 
 - [Preamble](#preamble)
 - [Python hides the hurt](#python-hides-the-hurt)
-- [Building a word processor with Python](#building-a-word-processor-with-python)
-- [Python building blocks: Objects](#python-building-blocks-objects)
-- [Writing a Python Script](#writing-a-python-script)
+- [Building a simple word processor](#building-a-simple-word-processor)
+- [Creating a single object](#creating-a-single-object)
+- [Combining objects into a program](#combining-objects-into-a-program)
   - [Refactoring a single program](#refactoring-a-single-program)
-- [Executing Two Files that Depend on Each Other](#executing-two-files-that-depend-on-each-other)
-- [Creating a module - more than two files](#creating-a-module---more-than-two-files)
+- [Combining programs into scripts](#combining-programs-into-scripts)
+- [Combining scripts into a module](#combining-scripts-into-a-module)
+- [Project structure](#project-structure)
   - [Modular Code](#modular-code)
   - [Unit Tests](#unit-tests)
   - [Requirements.txt and package dependencies](#requirementstxt-and-package-dependencies)
   - [Documentation](#documentation)
   - [Scripts](#scripts)
-  - [__init.py__](#__initpy__)
-  - [__main.py__ driver](#__mainpy__-driver)
-  - [Setup.py](#setuppy)
-- [Downloading our package and using it](#downloading-our-package-and-using-it)
+  - [`__init.py__`](#__initpy__)
+  - [`__main.py__` driver](#__mainpy__-driver)
+  - [`setup.py`](#setuppy)
+- [Sharing and using our package](#sharing-and-using-our-package)
 - [Super-advanced next steps](#super-advanced-next-steps)
-  - [Venv](#venv)
+  - [Testing in environments](#testing-in-environments)
+  - [More advanced testing](#more-advanced-testing)
   - [Continuous Integration](#continuous-integration)
-  - [Git Hooks](#git-hooks)
+  - [Git Hooks and Version Control](#git-hooks-and-version-control)
   - [Setup.cfg](#setupcfg)
   - [Sphinx/reST](#sphinxrest)
-  - [Builds](#builds)
+  - [Wheels](#wheels)
   - [PyPi](#pypi)
 - [Conclusion](#conclusion)
+- [Acknowledgements](#acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -43,30 +46,26 @@ layout: post
 
 ## Preamble
 
-Recently, I built a machine learning natural language app in Python. It has a Google-like web interface where you can type in a query. The program process JSON text input from a number of data sources. It then searches the text database for phrases that are similar based on a trained Tensorflow model and returns matches. 
+Python project structure and packaging standardization is still not a solved problem, something that became  even more apparent to me when I recently worked on packaging a machine learning natural language app. 
 
-![flow](img/flaskflow.png)
+In the JVM, [as long as you have your path structured correctly,](https://maven.apache.org/guides/introduction/introduction-to-the-standard-directory-layout.html) build tools will understand it and create a `package` for you into an executable `JAR`. 
 
-There are several moving parts: 
+But, when I started looking for the same standardization in Python, it wasn't as straightforward. Some questions I had as I worked:  Should I be using virtualenvs? Pipenvs? `Setuptools`? Should I have a `setup.cfg?` What are wheels, or eggs, for that matter?  Does each folder need an `__init.py__`? What does that file even do?  How do I reference modules along the same `PYTHONPATH`? 
 
-1) A data import/cleaning module
+It became apparent that Python's flexbility, which I really appreciate when I'm buckled down and writing code, makes it a huge pain to operationalize. 
 
-2) The Tensorflow machine learning model
+As I worked, I thought I'd write down everything I learned and built up to a complete Python project, from first principles, through a simple example, and thought it might help other people working through the same issues, as well. 
 
-3) The Flask webapp that accepts text input/surfaces the matches
+Come with me on a voyage of magic, adventure, and really annoying relative path references to find out how and why Python packaging works the way it does.
 
-When I started to figure out how to glue these three pieces together into a single package you would do a `pip install` on and have it work locally on any machine, it wasn't as straightforward as I hoped. It turned out that there was a lot going on in the Python packaging world. 
+This post goes through: 
 
-Should I be using virtualenvs? Pipenvs? `Setuptools`? Should I have a `setup.cfg?` Where do my tests go? Which testing suite do I use?  Does each folder need an `__init.py__`? What does that file even do?  How do I reference modules along the same `PYTHONPATH`? These were just some of the questions I had when I was getting started. 
-
-It became apparent that Python's flexbility, which I really appreciate when I'm writing code, makes it a huge pain to operationalize. 
-
-As I worked, I thought I'd write down everything I learned through a simple example. But, as I started writing, I realized I *extremely Inception voice* needed to go deeper to understand what's going on in the Python language.   
-
-So, the idea of this post is to build up to packaging from the very basics of Python internals.  Come with me on a voyage of magic, adventure, and really annoying relative path references to find out how and why Python packaging works the way it does. 
+![alice](img/package_flow.png)
 
 
-To go through this post, you should be reasonably comfortable with Python (aka if you know what a [list comprehension](http://effbot.org/zone/python-list.htm) is and how it works you should probably be good) and have some understanding of object-oriented programming basics.
+To comfortably go through the content, you should be reasonably comfortable with Python (aka if you know what a [list comprehension](http://effbot.org/zone/python-list.htm) is and how it works you should probably be good), and have some understanding of object-oriented programming basics.
+
+My hope is that this post becomes a living document, so if you see something egregiously wrong, or something I missed, feel free to submit a pull request.  
 
 ## Python hides the hurt
 
@@ -74,22 +73,8 @@ I'm going to start this Python post with a little Java. Sorry in advance.
 
 I'm currently working through a certificate in computer science, and most of my classes so far have been in Java.   I've previously done mostly dynamically-typed Python, and R, which is way out there, and Scala, but for Spark, which is a separate beast altogether, so I was a little intimidated by the shackles of Java syntax.   
 
-For instance, if I want to read a text file, change some text in it, and output to a new file, that process is pretty painless in Python:  
+For instance, if I want to read a text file, change some text in it, and output to a new file, Java requires a lot of scaffolding:  
 
-
-```
-
-# Replaces all instances in a file from "Alice" to "Dora the Explorer"
-
-with open('alice.txt', 'r') as input:
-	with open('new_alice.txt', 'w') as output:
-		for line in input:
-			line = line.rstrip()
-			newline = line.replace("Alice", "Dora the Explorer")
-			output.write(newline)
-```
-
-But by the time I'm done writing the Java version, I might as well have just replaced all the words in the file by hand: 
 
 ```java
 import java.io.*;
@@ -127,28 +112,43 @@ public static void main(String[] args) {
 
 } 
 ```
+But Python makes it relatively painless: 
 
-For a program of a couple lines, you might not want to use Java. But a benefit all of Java's scaffolding and type safety exist is that it makes large programs easier to package. 
+```
 
-In Java, you could have three classes, put them in a directory called `project/java/src/program` and call `package` on them, and they'll automatically reference each other. You can compile a package in Maven or similar through the command line. And you're done. 
+# Replaces all instances in a file from "Alice" to "Dora the Explorer"
 
-But, since Python abstracts types, objects, and paths away from the user, it becomes a bit more complicated internally. Python has to make up for that ease of use further down in the stack, and therefore packaging, file directory references, execution speed, and object operations become more of a challenge.  
+with open('alice.txt', 'r') as input:
+	with open('new_alice.txt', 'w') as output:
+		for line in input:
+			line = line.rstrip()
+			newline = line.replace("Alice", "Dora the Explorer")
+			output.write(newline)
+```
+
+
+
+For a program of a couple lines, you might not want to use Java. But a benefit all of Java's scaffolding and type safety, and, particularly its build tools, is that it makes large programs easier to package. 
+
+In Java, you could have three classes, put them in a project structure called `project/src/main/java/program` and call `package` on them, and they'll automatically reference each other. Each program is automatically split logically into a single class.  You can compile the separate programs in Maven. And you're done. 
+
+But, since Python abstracts types, objects, and paths away from the user, and there's no centralized build system, it becomes a bit more complicated internally.   
 
 To understand what Python abstracts away and why this leads to different architecture choices, let's start at The Beginning. 
 
 
-## Building a word processor with Python
+## Building a simple word processor
 
 ![alice](img/rabbit.jpg)
 
-Let's say I am Lewis Carroll, and I'm writing _Alice in Wonderland._ But instead of using plain ink and paper, I'd like to use some 21st century technology. 
+Let's say I am Lewis Carroll, and I'm writing _Alice in Wonderland._ But instead of using ink and paper, I'd like to use some 21st century technology. 
 
-What kinds of stuff do authors usually like to do to books, that can be easily automated with a program? Fixing spacing after a period from single to double, spellcheck, replacing words in entire texts, word count, and sending excerpts by email are all fair game. Authors like word editors. 
+What kinds of stuff do authors usually like to do to books, that can be easily automated with a program? Fixing spacing after a period from single to double, spellcheck, replacing words in entire texts, and word count are some common text editing tasks. Authors like word editors. 
 
 We're going to create a really, really (really) simple version of Word to demonstrate how Python packaging works, drilling down through internals and hopefully having some fun along the way. 
 
 
-## Python building blocks: Objects
+## Creating a single object
 
 
 ![alice](img/alice_door.gif)
@@ -161,7 +161,7 @@ I might  write something like,
 
 This is a variable, and also, a complete piece of Python code. It looks deceptively simple - a string. But it's really also an object, because everything, even primitive data types, is an object.  
 
-Objects are the building blocks of Python. You can create multiple objects that you bundle into a single executable file, known as a module.  You can bundle several modules into a package.  
+Objects are the building blocks of Python. You can create multiple objects that you bundle into a single executable file, known as a module.  You can bundle several modules into a package.  It gets a little more complicated when you also understand that packages and modules are also objects, but let's keep it pretty simple here. 
 
 ![pythonmodel](img/model.png)
 
@@ -203,7 +203,7 @@ You can see that it's an instance of class `string`. And, further, you can see t
 <class 'type'>
 ```
 
-It's classes and objects all the way down. We can also find out more about the string object with the `__doc__` method. 
+It's classes and objects all the way down. We can also find out more about the `string` object with the `__doc__` method. 
 
 ```
 >>> x.__doc__
@@ -213,9 +213,7 @@ It's classes and objects all the way down. We can also find out more about the s
 
 (If you're more curious about how strings specifically are created, digging into [the Python source code is fun](https://github.com/python/cpython/blob/2.7/Objects/stringobject.c), which is where the `__doc__` string comes from comes from. 
 
-And if we call `dir()`, we can see all of the object attributes (methods and attributes with double underscores) and all of the methods that can act on that class. Attributes are created specifically by higher-level Python classes. Methods are specific to that object.
-
-For example, most Python objects have the `__add__`, `__dir__`, and `__setattr__` attributes. Only strings have `join`, `strip`, and `replace` 
+And if we call `dir()`, we can see all of the object attributes and methods that can act on that class. Attributes are variables and methods created specifically by higher-level Python classes. Methods are specific to that object. For example, most Python objects have the `__add__`, `__dir__`, and `__setattr__` attributes. Only strings have `join`, `strip`, and `replace` 
  
 ```
 >>> dir(x)
@@ -224,7 +222,7 @@ For example, most Python objects have the `__add__`, `__dir__`, and `__setattr__
 <method-wrapper '__init__' of str object at 0x105ec4d88>
 ```
 
-You can check this by creating an int: 
+You can check this by creating an `int`: 
 
 ```
 >>> y = 9
@@ -232,7 +230,7 @@ You can check this by creating an int:
 ['__abs__', '__add__', '__and__', '__bool__', '__ceil__', '__class__', '__delattr__', '__dir__', '__divmod__', '__doc__', '__eq__', '__float__', '__floor__', '__floordiv__', '__format__', '__ge__', '__getattribute__', '__getnewargs__', '__gt__', '__hash__', '__index__', '__init__', '__int__', '__invert__', '__le__', '__lshift__', '__lt__', '__mod__', '__mul__', '__ne__', '__neg__', '__new__', '__or__', '__pos__', '__pow__', '__radd__', '__rand__', '__rdivmod__', '__reduce__', '__reduce_ex__', '__repr__', '__rfloordiv__', '__rlshift__', '__rmod__', '__rmul__', '__ror__', '__round__', '__rpow__', '__rrshift__', '__rshift__', '__rsub__', '__rtruediv__', '__rxor__', '__setattr__', '__sizeof__', '__str__', '__sub__', '__subclasshook__', '__truediv__', '__trunc__', '__xor__', 'bit_length', 'conjugate', 'denominator', 'from_bytes', 'imag', 'numerator', 'real', 'to_bytes']
 ```
 
-Finally, [the object's value](https://stackoverflow.com/questions/12693606/reason-for-globals-in-python). Since we're working in the Python REPL, x is a global variable, i.e. available to the entire Python namespace. Therefore, we should be able to see it:
+Finally, [the object's value](https://stackoverflow.com/questions/12693606/reason-for-globals-in-python). Since we're working in the Python REPL, `x` is a global variable, i.e. available to the entire Python namespace. Therefore, we should be able to see it:
 
 ```
 >>> globals()
@@ -250,7 +248,7 @@ We can run `globals` specifically on it to get its value:
 Now that we know what a single object can look like, let's get out of the shallows of the REPL and  create a bunch of them to interact with each other. 
 
 
-## Writing a Python Script
+## Combining objects into a program
 
 
 ![tea_muse](img/tea_mouse.jpg)
@@ -259,7 +257,6 @@ Now that we know what a single object can look like, let's get out of the shallo
 Usually, after we write a couple one-liners, we want to write a complete snippet of code that does something. For example, let's say Lewis Carroll has written a couple pages and wants to do a word count on the file he's written (writers always want to compulsively do word counts.)
 
 We'll work with `alice.txt` here: 
-
 
 ```
 Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, ‘and what is the use of a book,’ thought Alice ‘without pictures or conversations?’
@@ -306,8 +303,10 @@ int
 
 When we run `python wordcount.py`, a [couple things happen](https://tech.blog.aknin.name/2010/04/02/pythons-innards-introduction/): 
 
-1) Python parses command line arguments (aka everything after `python` on the CLI
+1) Python parses command line arguments (everything after `python` on the CLI)
+
 2) Python checks for any dependencies (aka `import` statements) and pulls them in. 
+
 3) Python looks in our current working directory (`python_packaging`) for anything related to the file, and uses the path setup from when Python was installed on your system. 
 
 Let's check what our `PYTHONPATH` is:
@@ -315,7 +314,7 @@ Let's check what our `PYTHONPATH` is:
 ```
 >>> import os
 >>> os.getcwd() #where we're currently running code
-'/Users/vboykis/Desktop/python_packaging'
+'/python_packaging'
 
 >>> print('\n'.join(sys.path)) # all the paths Python checks for packages
 
@@ -327,7 +326,8 @@ Let's check what our `PYTHONPATH` is:
 ```
 
 4) Python assembles a Python virtual machine, [CPython](https://en.wikipedia.org/wiki/CPython), to execute and interpret the code. 
-5) If there are no external dependencies, as is the case in our word count program, a special attributed, ``__name__`` is initialized to ``"__main__"`` in the __main__ [namespace](https://docs.python.org/3/library/__main__.html). 
+
+5) If there are no external dependencies (aka packages), as is the case in our word count program, a special attributed, ``__name__`` is initialized to ``"__main__"`` in the __main__ [namespace](https://docs.python.org/3/library/__main__.html). 
 
 Program: 
 
@@ -358,16 +358,26 @@ However, if you run `wordcount.py` form the REPL, since you're importing the `wo
 'wordcount'
 ```
 
-5) All of the code gets translated at run-time to byte code using the CPython interpreter. Python 
-generates a copy of the file with the `.pyc` extension in the same directory where you run it. If you want to take a look at what the byte code of your program looks like, [digging into it](http://akaptur.com/blog/2013/08/14/python-bytecode-fun-with-dis/) can be fun.
+6) All of the code gets translated at run-time to byte code using the CPython interpreter. Python 
+generates a copy of the file with the `.pyc` extension in a folder called `__pycache__`.
 
-6) As the code is executed, Python reads all of our objects and loops. The interpreter allocates memory to the code and the special Python strucutres for each object are created. This is where the `id` for each object is created, and why we can call these things after we run the code. 
+If you want to take a look at what the byte code of your program looks like, [digging into it](http://akaptur.com/blog/2013/08/14/python-bytecode-fun-with-dis/) can be fun.
+
+7) As the code is executed, Python reads all of our objects and loops. The interpreter allocates memory to the code and the special Python strucutres for each object are created. This is where the `id` for each object is created, and why we can call these things after we run the code. 
  
 We've just created a Python runtime environment, told Python which directories it should be reading from, imported some stuff, allocated memory, and given some output. Basically all of the things we do to run a program. 
  
 ### Refactoring a single program 
 
-Now that we've run a single program, let's make it a easier to read and work with other code by adding entry endpoints. We'll make it a function and add `if __name__ == '__main__'` to the program. This is a really common pattern for running multiple functions and keeping track of them.  If the program is the main program you're running, Python will run everything in order under that statement. 
+Ok, so we've run our program. But, if we try to run it on any other file, not just `alice.txt`, we won't be able to. Let's make it a bit more robust. First, we'll abstract out some of the hard coding referencing `alice.txt`. 
+
+Second, we'll turn the code from a simple loop, into a function that acts like an API so
+
+finally, 
+
+  The best way to do this is to make it a easier to read and work with other code by adding entry endpoints. 
+
+We'll make it a function and add `if __name__ == '__main__'` to the program. This is a really common pattern for running multiple functions and keeping track of them.  If the program is the main program you're running, Python will run everything in order under that statement. 
 
 Note that if you don't have `if __name__ == '__main__'`, the code won't run anything since the function is initialized but not executed. 
 
@@ -375,13 +385,12 @@ This is a really important pattern to understand, because it looks into how Pyth
 
 Let's also:  
 
-1) Remove some of the hard coding referencing `alice.txt`
+1) Remove some of the hard coding referencing 
 2) Turn the code into a function
 3) Adding a function that counts sentences, too. 
 
 These kinds of refactoring tasks will become important as we start to understand how many files, or modules, reference each other in a package. 
 
-Ok, so we've run our file. Now what? Let's refactor it so we can call it on any file, not just `alice.txt`.  The best way to do this is to turn the loop into a function, which we can call from anywhere, instead of just in that specific file. 
 
 Program: 
 
@@ -435,9 +444,19 @@ Let's do one more thing, and now make this a class so that it's really, really e
 And, let's add a character count (we'll need that for some later work we're doing): 
 
 ```
-import re
+#!/usr/bin/env python
 
-class WC(object):
+"""Takes a file as sys.arg[1] as input and returns a wordcount, 
+character count, and sentence count.
+
+Sysargs:  filename
+"""
+
+import re
+import sys
+
+
+class WC:
 	"""Conducts character, word, and letter count of object"""
 
 	def __init__(self, filename):
@@ -445,35 +464,36 @@ class WC(object):
 		self.filename = filename
 
 
-	def open_file(self, filename):
+	def open_file(self,filename):
 		"""Opens a file object to be used across the class"""
 		with open(filename,'r') as f:
 			file_contents = f.read()
 			return file_contents
 
 
-	def word_count(self,filename):
+	def word_count(self):
 		"""Returns a file's word count"""
 
-		wc_file = self.open_file(filename)
-		return("Words:", len(wc_file.split()))
+		wc_file = self.open_file(self.filename)
+		self = len(wc_file.split())
+		return("Words:",len(wc_file.split()))
 
 
-	def sentence_count(self, filename):
+	def sentence_count(self):
 		"""Returns a file's word sentence count"""
 
-		sc_file = self.open_file(filename)
+		sc_file = self.open_file(self.filename)
 		
-		return("Sentences", sc_file.count('.') + sc_file.count('!') + sc_file.count('?'))
+		return("Sentences:", sc_file.count('.') + sc_file.count('!') + sc_file.count('?'))
 
-	def character_count(self, filename):
+	def letter_count(self):
 
-		"""Returns a file's character count"""
+		"""Returns a file's character count, excluding punctuation"""
 		letter_counter = 0
 
 		pattern = r'[\W]' # excluding all punctuation
 
-		cc_file = self.open_file(filename)
+		cc_file = self.open_file(self.filename)
 
 		total_words = cc_file.split()
 
@@ -484,14 +504,12 @@ class WC(object):
 		
 		return("Letters:", letter_counter)
 
-
+	def counts(self):
+		print(self.word_count(),'\n',self.sentence_count(),'\n',self.letter_count())
 
 if __name__ == '__main__':
-	alice = WC('alice.txt')
-	print(alice.word_count('alice.txt'))
-	print(alice.sentence_count('alice.txt'))
-	print(alice.character_count('alice.txt'))
-
+	alice = WC(sys.argv[1])
+	WC.counts(alice)
 
 ```
 
@@ -500,7 +518,7 @@ Now we're cooking. We've got the program that's easy to read, abstractable, and 
 For bonus fun and to do some QA, you can paste the test into Word to do a sanity check. I got 274 words, which matches our program. 
 
 
-## Executing Two Files that Depend on Each Other
+## Combining programs into scripts
 
 ![alice](https://cdn-images-1.medium.com/max/1600/1*c8z_BEgJvo7ra4IKH28RfA.jpeg)
 
@@ -599,8 +617,7 @@ This distinction makes up the heart of the Python packaging system.
 
 Let's finish up by replace a callable object with an api, as well. 
 
-## Creating a module - more than two files
-
+## Combining scripts into a module
 
 ![tea party](img/tea_party.png)
 
@@ -665,6 +682,8 @@ Which brings me to a (probably obvious) tip: Try to base your software on existi
 
 At its very basic level, this is what our code structure looks like. 
 
+## Project structure
+
 But, there are signals we need to give to Python to read this correctly.  CPython also needs to know how these things relate to each other in order to compile a package for us. And the code needs to be built in a way such that other people can seamlessly download it and use it without a lot of explanation from you. 
 
 Which is why, if you look at some popular Python project folder structures,like [Pandas](https://github.com/pandas-dev/pandas), [Requests](https://github.com/requests/requests), or [Flask](https://github.com/pallets/flask), you'll see they tend to be a bit more complicated.  
@@ -707,7 +726,7 @@ import sys
 import os
 
 
-sys.path.append(os.path.abspath("/Users/vboykis/Desktop/python_packaging/textedit/textedit/review"))
+sys.path.append(os.path.abspath("python_packaging/textedit/textedit/review"))
 from wordcount import WC
 
 WC_test = WC('../texts/alice.txt')
@@ -760,15 +779,15 @@ Before, we were executing everything in the same folder. But now, Python needs t
 ```
 >>> import os
 >>> os.getcwd() #where wer're currently running code
-'/Users/vboykis/Desktop/python_packaging'
+'/python_packaging'
 
 >>> print('\n'.join(sys.path)) # all the paths Python checks for packages
 ```
 
-So we have to add this `sys.path.append(os.path.abspath("/Users/vboykis/Desktop/python_packaging/textedit/textedit/review"))` to our sys path so Python knows where to refrence it from:
+So we have to add this `sys.path.append(os.path.abspath("/python_packaging/textedit/textedit/review"))` to our sys path so Python knows where to refrence it from:
 
 ```
->>>sys.path.append(os.path.abspath("/Users/vboykis/Desktop/python_packaging/textedit/textedit/review"))
+>>>sys.path.append(os.path.abspath("/python_packaging/textedit/textedit/review"))
 >>> print('\n'.join(sys.path))
 
 /usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python35.zip
@@ -776,10 +795,10 @@ So we have to add this `sys.path.append(os.path.abspath("/Users/vboykis/Desktop/
 /usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/plat-darwin
 /usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/lib-dynload
 /usr/local/lib/python3.5/site-packages
-/Users/vboykis/Desktop/python_packaging/textedit/textedit/review
+/python_packaging/textedit/textedit/review
 ```
 
-And there it is, at the end. For now, we have to add that to every file that we want to import. 
+And there it is, at the end. For now, we have to add `sys.path.append` to every file that we want to import. This is temporary, just to show how that works. We'll fix this later. 
 
 And, speaking of imports, we now have external packages that we're calling: os, re, and sys, common modules. How does our package know how to call those? 
 
@@ -807,9 +826,9 @@ For example, we've used `os`, `sys`, and `re` in building this module so far. Th
 
 To create a requirements file, you would normally do a  `pip freeze > requirements.txt`. You'll notice that this includes a lot of stuff, basically everything you have in your Python environment, since `pip freeze` doesn't know which specific packages you're using to build your package and there could be interactions. 
 
-There are several ways to build requirements on a per-project basis, but we're not going to use them here because we want to focus, agian, on packaging rather than Python environments. A simpler way to do this is to install [pipreqs and take it from there](https://github.com/bndr/pipreqs). 
+There are several ways to build requirements on a per-project basis, but we're not going to use them here because we want to focus, again, on packaging rather than Python environments. A simpler way to do this is to install [pipreqs and take it from there](https://github.com/bndr/pipreqs). 
 
-`pipreqs --force "/Users/vboykis/Desktop/python_packaging/textedit/textedit"`
+`pipreqs --force "/python_packaging/textedit/textedit"`
 
 If you run that, you'll see that the file generated is blank, because the three modules we've included, `os`, `re`, and `sys`, are part of the standard Python library. If we included something like NumPy, we'd get:
 
@@ -857,7 +876,7 @@ For classes: Scikit learn is really good at [this](https://github.com/scikit-lea
 
 ### Scripts
 
-If you have any shell scripts or additional helper methods associated with your project, you can create a `bin` directory for them.  We don't, so that folder will be empty. But scripts are usually present anywhere you have to deploy stuff, add it to chron, or generally put it in production in any way. 
+If you have any shell scripts or additional helper methods associated with your project, you can create a `bin` directory for them.  We don't, so that folder will be empty. But scripts are usually present anywhere you have to deploy stuff, add it to cron, or generally put it in production in any way. 
 
 This is also where continuous integration can come in. 
 
@@ -881,7 +900,7 @@ This is also where continuous integration can come in.
 			
 ```
 
-### __init.py__
+### `__init.py__`
 
 And, finally and most importantly, the `__init__.py`, which you'll want to add to every directory where you have runable Python modules. 
 
@@ -891,7 +910,7 @@ You can leave it null. Or you can [add things to it](http://mikegrouchy.com/blog
 
 When Python imports the module for the first time, it checks the module registry for a list of modules that it can use. `Init` allows your module to be [put in that registry.](http://effbot.org/zone/import-confusion.htm#what-does-python-do). 
 
-### __main.py__ driver
+### `__main.py__` driver
 
 There is this concept in Java of a driver program that you can run and have it call all the other programs in the package. 
 
@@ -922,7 +941,7 @@ Additionally, there are mixed thoughts about having a driver. Google's Python co
 			
 ```
 
-### setup.py
+### `setup.py`
 
 
 Now that we have the scaffolding in place, we can add things that will help us set up the module after we import it from pip or download it. 
@@ -933,8 +952,10 @@ It has metadata about the project, `import distutils`, which does the actual pro
 
 Here's more [really good background](https://github.com/kennethreitz/setup.py) on what goes into the file.  
 
-Here's what ours will look like. The most important part is setting the `here` variable to the current filepath. Remember how we had to do crazy things to get our modules to reference each other in the context of the package? 
-`sys.path.append(os.path.abspath("/Users/vboykis/Desktop/python_packaging/textedit/textedit/review"))`
+Here's what ours will look like. The most important part is setting the `here` variable to the current filepath. 
+
+Remember how we had to do crazy things to get our modules to reference each other in the context of the package? 
+`sys.path.append(os.path.abspath("python_packaging/textedit/textedit/review"))`
 
 This lets us avoid all of that and forces a root directory.
  
@@ -1056,8 +1077,7 @@ You can see that in action here, [for example](https://github.com/pallets/flask/
 
  
 
-
-## Downloading our package and using it
+## Sharing and using our package
 
 ![wordmenu](http://wordyenglish.com/alice/i/jt/p20/alice_08c-alice_flamingo.png)
 
@@ -1065,7 +1085,7 @@ Ok, we're done writing all of our code, our tests, making sure objects are acces
 
 Let's go to the module level of our package - where our `setup.py` file that will actually handle the install is located
 
-`mbp-vboykis:textedit vboykis$ cd /Users/vboykis/Desktop/python_packaging/textedit/textedit`
+`mbp-vboykis:textedit vboykis$ cd /python_packaging/textedit/textedit`
 
 and run 
 
@@ -1075,7 +1095,7 @@ You should see something like this:
 
 ```
 mbp-vboykis:textedit vboykis$ pip install .
-Processing /Users/vboykis/Desktop/python_packaging/textedit/textedit
+Processing /python_packaging/textedit/textedit
 Installing collected packages: textedit
   Running setup.py install for textedit ... done
 Successfully installed textedit-0.0.0
@@ -1130,7 +1150,7 @@ from textedit.edit import spacing
 from textedit.edit import replace
 
 
-test_file = '/Users/vboykis/Desktop/python_packaging/textedit/textedit/texts/pool_of_tears.txt'
+test_file = '/python_packaging/textedit/textedit/texts/pool_of_tears.txt'
 
 # Count words
 alice = wordcount.WC(test_file)
@@ -1157,8 +1177,7 @@ print('Words replaces')
 
 The next step would be to use [`argparse`](https://docs.python.org/3/library/argparse.html) to pass arguments a bit more cleanly. 
 
-And it is! We've imported a package that we can now use to write other software. 
-
+And that's it! We've imported a package that we can now use to write other software. 
 
 
 ## Super-advanced next steps
@@ -1172,6 +1191,9 @@ What's next? A lot. But we're not going to cover any of it in this post, because
 But, now that we've taken our first step into a much larger and more insane world, there are a lot more next steps we can take to make sure our code is clean, secure, and easy to use. 
 
 Here are some great places to start exploring once you've gotten the hang of the above: 
+
+
+https://packaging.python.org/discussions/wheel-vs-egg/
 
 ### Testing in environments
 
@@ -1209,13 +1231,34 @@ In our module, there are no passwords or usernames. But if you're working with d
 
 We've already written README.md. But what if you have multiple files that rely on each other? Or you want to use your docstrings to build documentation? [Sphinx and reST](https://thomas-cokelaer.info/tutorials/sphinx/introduction.html) are some ways popular Python pakcages are documented. 
 
+### Wheels
+
+Once you're done refining all of that, and you're ready to go to production, you should build a wheel. Python [wheels](https://packaging.python.org/tutorials/distributing-packages/#wheels) are similar to `JAR` packages in Java, and are a much faster and lightweight process to use in production environments.  You can use `setup.py` to build wheels (which is why it's so important to get it right initially), `python setup.py bdist_wheel --universal`, but they don't
+
+For much, much more info on wheels, see [here](http://pythonwheels.com/.)
+
 
 ### PyPi
 
-This is the big one. If your module is stable enough, you [can release it to PyPi](https://glyph.twistedmatrix.com/2016/08/python-packaging.html), which means anyone in the world can download it through `pip`. There are some extra hoops you have to jump through here, namely in how you configure your setup.py file. Once you're ready, the whole world can see your text editor. :)
+This is the big one. If your module is stable enough, you [can release it to PyPi](https://glyph.twistedmatrix.com/2016/08/python-packaging.html), which means anyone in the world can download it through `pip`. There are some [extra hoops you have to jump through here](https://hynek.me/articles/sharing-your-labor-of-love-pypi-quick-and-dirty/), namely in how you configure your setup.py file. 
+For an easier way to do this, [Flit](http://flit.readthedocs.io/en/latest/) is a potential option. 
+
+Once you're ready, the whole world can see  and use your text editor. 
 
 
 ## Conclusion
 
-Python packaging can be intimidating, but as we've seen, if you take it step by step, it doesn't have to be. Look at other people's code, particulalry smaller, modular projects, break the work up into pieces, and read the resources linked. Good luck!
+Python project structure and packaging can be intimidating, but, if you take it step by step, it doesn't have to be. 
+
+Look at other people's code, particularly smaller, modular projects, break the work up into pieces, and work through it piece by piece, until you're all the way down the rabbit hole. 
+
+Good luck!
+
+## Acknowledgements
+
+A huge thank you to [Sam Zeitlin](https://twitter.com/SamanthaZeitlin), [Tom Ausperger](https://twitter.com/TomAugspurger), [William Cox](https://twitter.com/gallamine), and [Mark Roddy](https://twitter.com/digitallogic) for reading drafts of this post. 
+
+Any additional errors are wholly my own and the fault of too many late nights spent in the [Tenniel Alice in Wonderland illustrations.](http://www.gutenberg.org/files/114/114-h/114-h.htm) 
+
+To fix a bug, submit a pull request. 
 

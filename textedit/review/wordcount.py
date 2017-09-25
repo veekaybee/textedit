@@ -10,7 +10,7 @@ import re
 import sys
 
 
-class WC(object):
+class WC:
 	"""Conducts character, word, and letter count of object"""
 
 	def __init__(self, filename):
@@ -40,7 +40,7 @@ class WC(object):
 		
 		return("Sentences:", sc_file.count('.') + sc_file.count('!') + sc_file.count('?'))
 
-	def character_count(self):
+	def letter_count(self):
 
 		"""Returns a file's character count, excluding punctuation"""
 		letter_counter = 0
@@ -58,12 +58,12 @@ class WC(object):
 		
 		return("Letters:", letter_counter)
 
-if __name__ == '__main__':
-	filename = sys.argv[1]
-	alice = WC(filename)
+	def counts(self):
+		print(self.word_count(),'\n',self.sentence_count(),'\n',self.letter_count())
 
-	print(WC.word_count(alice))
-	print(WC.sentence_count(alice))
-	print(WC.character_count(alice))
+if __name__ == '__main__':
+	alice = WC(sys.argv[1])
+	WC.counts(alice)
+
 
 

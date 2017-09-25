@@ -20,8 +20,7 @@ These directions are for OSX/Linux-based systems. Windows will be slightly diffe
 1. You'll need at least Python 3.5 to run Text Edit.
 2. `git clone https://gitlab.com/veekaybee/textedit.git`
 3. `cd textedit`
-3. Run `python setup.py install`
-4. Run `pip -r requirements.txt`
+4. Run `pip install .`
 5. That's it! You're ready to use textedit. 
 6. If you encounter any issues, `export PYTHONPATH="${PYTHONPATH}:/my/other/path"` to your `~/.bashrc` or Windows equivalent file. 
 7. Running tests: `python -m unittest discover` to test whether wordcount works. 

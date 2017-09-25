@@ -37,10 +37,11 @@ if __name__ == '__main__':
 
 	Replace(filename, old_word, new_word)
 
+	# Check wordcount 
 	alice = WC(sys.argv[1])
 	new_alice = WC('../texts/new_alice.txt')
 
-	# Output stats
+	# Output stats - optional
 	print("Old Wordcount",alice.word_count())
 	print("WC __name__:", WC.__name__)
 	print("New Wordcount",new_alice.word_count())
