@@ -1,7 +1,7 @@
 # ✏️ Text Edit in Wonderland ✏️ 
 
 
-<img src="img/alice_pig.jpg" alt="Alice with Pig" style="width: 200px;"/>
+<img src="alice_pig.jpg" alt="Alice with Pig" style="width: 200px;"/>
 
 The mini text editor for people who want to focus on learning Python packaging. This text editor lets you: 
 
