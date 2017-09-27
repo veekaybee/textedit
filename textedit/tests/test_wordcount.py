@@ -4,8 +4,8 @@ import unittest
 import sys
 import os
 
-# import wordcount from its relative path
-from review.wordcount import WC
+
+from review.wordcount import WC # import wordcount from its relative path
 
 WC_test = WC('../texts/alice.txt')
 

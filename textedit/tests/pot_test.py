@@ -1,13 +1,13 @@
 """Tests textedit functionality of the textedit module on the pool_of_tears.txt file"""
 
 
-from textedit.review import readability  #import everything in the file
-from textedit.review.wordcount import WC #import classes specifically
-from textedit.edit.spacing import Spacing
-from textedit.edit.replace import Replace
+from review import readability  #import everything in the file named readability
+from review.wordcount import WC #import classes specifically
+from edit.spacing import Spacing
+from edit.replace import Replace
 
 
-test_file = '/Users/vboykis/Desktop/python_packaging/textedit/textedit/texts/pool_of_tears.txt'
+test_file = '../texts/pool_of_tears.txt'
 
 # Count words
 

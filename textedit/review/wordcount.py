@@ -3,11 +3,12 @@
 """Takes a file as sys.arg[1] as input and returns a wordcount, 
 character count, and sentence count.
 
-Sysargs:  filename
+Argv:  filename
 """
 
 import re
 import sys
+import os
 
 
 class WC:
