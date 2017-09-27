@@ -63,13 +63,13 @@ mbp-vboykis:review vboykis$ python readability.py "../texts/alice.txt"
 Or, you can import it and use on a text file: 
 
 ```
-from textedit.review import readability  #import everything in the file
-from textedit.review.wordcount import WC #import classes specifically
-from textedit.edit.spacing import Spacing
-from textedit.edit.replace import Replace
+from review import readability  #import everything in the file named readability
+from review.wordcount import WC #import classes specifically
+from edit.spacing import Spacing
+from edit.replace import Replace
 
 
-test_file = 'python_packaging/textedit/textedit/texts/pool_of_tears.txt'
+test_file = '../texts/pool_of_tears.txt'
 
 # Count words
 
