@@ -1,1 +1,2 @@
-numpy==1.11.0
+nltk==3.2
+setuptools==36.5.0

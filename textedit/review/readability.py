@@ -12,11 +12,12 @@ L = average number of letters per 100 words and;
 S = average number of sentences per 100 words.
 0.0588L – 0.296S – 15.8
 
-Sysargs:  filename
+Argv:  filename
 
 """
 from review.wordcount import WC
 import sys
+import nltk
 
 WORD_INCREMENT = 100
 
