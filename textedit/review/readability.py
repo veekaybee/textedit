@@ -15,34 +15,28 @@ S = average number of sentences per 100 words.
 Argv:  filename
 
 """
-from review.wordcount import WC
 import sys
-import nltk
+
+from review.wordcount import WC
 
 WORD_INCREMENT = 100
 
 
 def get_letters(filename):
+    L = WC.character_count(filename)[1] / WC.word_count(filename)[1] * 100
+    return L
 
-	L = WC.character_count(filename)[1] /  WC.word_count(filename)[1] * 100 
-	return L
 
 def get_sentences(filename):
-
-	S = WC.sentence_count(filename)[1]/ WC.word_count(filename)[1] * 100 
-	return S
+    S = WC.sentence_count(filename)[1] / WC.word_count(filename)[1] * 100
+    return S
 
 
 def colman_liau(filename):
-	file_operator = WC(filename)
-	index = 0.0588 * get_letters(file_operator) - 0.296 * get_sentences(file_operator) - 15.8
-	return("Reading Grade Level of Text:", round(index))
+    file_operator = WC(filename)
+    index = 0.0588 * get_letters(file_operator) - 0.296 * get_sentences(file_operator) - 15.8
+    return ("Reading Grade Level of Text:", round(index))
 
 
 if __name__ == '__main__':
-	print(colman_liau(sys.argv[1]))
-
-
-
-
-
+    print(colman_liau(sys.argv[1]))
