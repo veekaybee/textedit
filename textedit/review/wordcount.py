@@ -32,7 +32,7 @@ class WC:
         return ("Words:", len(wc_file.split()))
 
     def sentence_count(self):
-        """Returns a file's word sentence count"""
+        """Returns a file's sentence count"""
 
         sc_file = self.open_file(self.filename)
 
