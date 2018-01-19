@@ -19,8 +19,6 @@ import sys
 
 from review.wordcount import WC
 
-WORD_INCREMENT = 100
-#Should WORD_INCREMENT be used somewhere?
 
 def get_letters(filename):
     L = WC.character_count(filename)[1] / WC.word_count(filename)[1] * 100
