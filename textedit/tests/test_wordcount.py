@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         self.assertEqual(WC_test.sentence_count(), self.sc)
 
     def test_characters(self):
-        self.assertEqual(WC_test.character_count(), self.cc)
+        self.assertEqual(WC_test.letter_count(), self.cc)
 
 
 if __name__ == '__main__':
