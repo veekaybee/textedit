@@ -21,18 +21,19 @@ from review.wordcount import WC
 
 
 def get_letters(filename):
-    L = WC.character_count(filename)[1] / WC.word_count(filename)[1] * 100
+    file_operator = WC(filename)
+    L = file_operator.letter_count()[1] / WC.word_count()[1] * WORD_INCREMENT
     return L
 
 
 def get_sentences(filename):
-    S = WC.sentence_count(filename)[1] / WC.word_count(filename)[1] * 100
+    file_operator = WC(filename)
+    S = file_operator.sentence_count()[1] / file_operator.word_count()[1] * WORD_INCREMENT
     return S
 
 
 def colman_liau(filename):
-    file_operator = WC(filename)
-    index = 0.0588 * get_letters(file_operator) - 0.296 * get_sentences(file_operator) - 15.8
+    index = 0.0588 * get_letters(filename) - 0.296 * get_sentences(filename) - 15.8
     return ("Reading Grade Level of Text:", round(index))
 
 
